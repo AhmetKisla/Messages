@@ -35,31 +35,36 @@ class KullanicilarPage extends StatelessWidget {
               return ListView.builder(
                 itemCount: tumKullanicilar.length,
                 itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.of(context, rootNavigator: true).push(
-                        MaterialPageRoute(
-                          builder: (context) => Konusma(
-                            currentUser: _userModel.kullanici,
-                            sohbetEdienUser: sonuc.data[index],
+                  if (sonuc.data[index].kullaniciID != _userModel.kullanici.kullaniciID) {
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context, rootNavigator: true).push(
+                          MaterialPageRoute(
+                            builder: (context) => Konusma(
+                              currentUser: _userModel.kullanici,
+                              sohbetEdienUser: sonuc.data[index],
+                            ),
                           ),
+                        );
+                      },
+                      child: ListTile(
+                        title: Text(sonuc.data[index].userName),
+                        leading: CircleAvatar(
+                          backgroundImage: NetworkImage(sonuc.data[index].profilURL),
+                          backgroundColor: Colors.white,
                         ),
-                      );
-                    },
-                    child: ListTile(
-                      title: Text(sonuc.data[index].userName),
-                      leading: CircleAvatar(
-                        backgroundImage: NetworkImage(sonuc.data[index].profilURL),
-                        backgroundColor: Colors.white,
+                        subtitle: Text(sonuc.data[index].email),
                       ),
-                      subtitle: Text(sonuc.data[index].email),
-                    ),
-                  );
+                    );
+                  } else
+                    return Container();
                 },
               );
             }
           } else
-            return Container();
+            return Center(
+              child: Text("Kullanici Yok"),
+            );
         },
       ),
     );
