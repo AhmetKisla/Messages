@@ -4,6 +4,7 @@ import 'package:messaging_app/kullanici_profil/my_custom_bottom.dart';
 import 'package:messaging_app/kullanici_profil/profil.dart';
 import 'package:messaging_app/kullanici_profil/tab_items.dart';
 import 'package:messaging_app/model/user_model.dart';
+import 'package:messaging_app/sohbet/konusmalarim.dart';
 import 'package:messaging_app/viewmodel/user_model.dart';
 import 'package:provider/provider.dart';
 
@@ -19,12 +20,13 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   TabItem _currentTab = TabItem.Kullanicilar;
   Map<TabItem, Widget> tumSayfalar() {
-    return {TabItem.Kullanicilar: KullanicilarPage(), TabItem.Profil: ProfiPage()};
+    return {TabItem.Kullanicilar: KullanicilarPage(), TabItem.Profil: ProfiPage(), TabItem.Konusmalarim: Konusmalarim_Page()};
   }
 
   Map<TabItem, GlobalKey<NavigatorState>> navigatorKeys = {
     TabItem.Kullanicilar: GlobalKey<NavigatorState>(),
     TabItem.Profil: GlobalKey<NavigatorState>(),
+    TabItem.Konusmalarim: GlobalKey<NavigatorState>(),
   };
 
   /*Future<bool> _cikisYap(BuildContext context) async {

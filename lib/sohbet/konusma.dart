@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:messaging_app/model/mesaj.dart';
 import 'package:messaging_app/model/user_model.dart';
 import 'package:messaging_app/viewmodel/user_model.dart';
@@ -15,6 +17,7 @@ class Konusma extends StatefulWidget {
 
 class _KonusmaState extends State<Konusma> {
   var _mesajController = TextEditingController();
+  ScrollController _scrollController = new ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +45,8 @@ class _KonusmaState extends State<Konusma> {
                 }
                 List<Mesaj> tumMesajlar = streamMesajlarListesi.data;
                 return ListView.builder(
+                  reverse: true,
+                  controller: _scrollController,
                   itemCount: tumMesajlar.length,
                   itemBuilder: (context, index) {
                     return _konusmaBalonuOlustur(tumMesajlar[index]);
@@ -55,6 +60,7 @@ class _KonusmaState extends State<Konusma> {
                 children: [
                   Expanded(
                     child: TextField(
+                      maxLength: 100,
                       controller: _mesajController,
                       cursorColor: Colors.blueGrey,
                       style: new TextStyle(
@@ -91,7 +97,13 @@ class _KonusmaState extends State<Konusma> {
                           var sonuc = await _userModel.saveMesage(_kaydedilecekMesaj);
                           if (sonuc) {
                             print('selam');
+
                             _mesajController.clear();
+                            _scrollController.animateTo(
+                              0.0,
+                              curve: Curves.slowMiddle,
+                              duration: const Duration(milliseconds: 100),
+                            );
                           }
                         }
                       },
@@ -109,7 +121,12 @@ class _KonusmaState extends State<Konusma> {
   Widget _konusmaBalonuOlustur(Mesaj oankiMesaj) {
     Color _gelenMesajRenk = Colors.blue;
     Color _gidenMesajRenk = Colors.purple;
-
+    String saatDk = "";
+    try {
+      saatDk = _saatDkgoster(oankiMesaj.date);
+    } catch (e) {
+      print("Saat Getirilirken Hata Olustu:" + e.toString());
+    }
     var _benimMesajimMi = oankiMesaj.bendenMi;
     if (_benimMesajimMi) {
       return Padding(
@@ -117,11 +134,19 @@ class _KonusmaState extends State<Konusma> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Container(
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), color: _gidenMesajRenk),
-              padding: EdgeInsets.all(10),
-              margin: EdgeInsets.all(4),
-              child: Text(oankiMesaj.mesaj),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Flexible(
+                  child: Container(
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), color: _gidenMesajRenk),
+                    padding: EdgeInsets.all(10),
+                    margin: EdgeInsets.all(4),
+                    child: Text(oankiMesaj.mesaj),
+                  ),
+                ),
+                Text(saatDk),
+              ],
             )
           ],
         ),
@@ -136,17 +161,26 @@ class _KonusmaState extends State<Konusma> {
                 CircleAvatar(
                   backgroundImage: NetworkImage(widget.sohbetEdienUser.profilURL),
                 ),
-                Container(
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), color: _gelenMesajRenk),
-                  padding: EdgeInsets.all(10),
-                  margin: EdgeInsets.all(4),
-                  child: Text(oankiMesaj.mesaj),
-                )
+                Flexible(
+                  child: Container(
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), color: _gelenMesajRenk),
+                    padding: EdgeInsets.all(10),
+                    margin: EdgeInsets.all(4),
+                    child: Text(oankiMesaj.mesaj),
+                  ),
+                ),
+                Text(saatDk),
               ],
             )
           ],
         ),
       );
     }
+  }
+
+  String _saatDkgoster(Timestamp date) {
+    var _formatter = DateFormat.Hm();
+    String _formatliTarih = _formatter.format(date.toDate());
+    return _formatliTarih;
   }
 }

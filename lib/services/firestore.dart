@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:messaging_app/model/konusma_model.dart';
 import 'package:messaging_app/model/mesaj.dart';
 import 'package:messaging_app/model/user_model.dart';
 import 'package:messaging_app/services/db_base.dart';
@@ -61,8 +62,12 @@ class FireStoreDbService implements DbBase {
   //Bu kısımda mesajları elde ettik **** Tekrar incele
   @override
   Stream<List<Mesaj>> getMessages(String currentUserID, String konusulanUserId) {
-    var snapShot =
-        _firebaseFirestore.collection('konusmalar').doc(currentUserID + '--' + konusulanUserId).collection('mesajlar').orderBy('date').snapshots();
+    var snapShot = _firebaseFirestore
+        .collection('konusmalar')
+        .doc(currentUserID + '--' + konusulanUserId)
+        .collection('mesajlar')
+        .orderBy('date', descending: true)
+        .snapshots();
     return snapShot.map((mesajListesi) => mesajListesi.docs.map((mesaj) => Mesaj.fromMap(mesaj.data())).toList());
   }
 
@@ -72,8 +77,41 @@ class FireStoreDbService implements DbBase {
     var _receiverDocumentID = kaydedilecekMesaj.kime + '--' + kaydedilecekMesaj.kimden;
     var _kaydedilecekMesajMapYapisi = kaydedilecekMesaj.toMap();
     await _firebaseFirestore.collection('konusmalar').doc(_myDocumentID).collection('mesajlar').doc(_mesajID).set(_kaydedilecekMesajMapYapisi);
+
+    await _firebaseFirestore.collection('konusmalar').doc(_myDocumentID).set({
+      'konusma_sahibi': kaydedilecekMesaj.kimden,
+      'kimle_konusuyor': kaydedilecekMesaj.kime,
+      'son_yollanan_mesaj': kaydedilecekMesaj.mesaj,
+      'son_gorulme': false,
+      'olusturulma_tarihi': FieldValue.serverTimestamp(),
+    });
+
     _kaydedilecekMesajMapYapisi.update('bendenMi', (value) => false);
     await _firebaseFirestore.collection('konusmalar').doc(_receiverDocumentID).collection('mesajlar').doc(_mesajID).set(_kaydedilecekMesajMapYapisi);
+
+    await _firebaseFirestore.collection('konusmalar').doc(_receiverDocumentID).set({
+      'konusma_sahibi': kaydedilecekMesaj.kime,
+      'kimle_konusuyor': kaydedilecekMesaj.kimden,
+      'son_yollanan_mesaj': kaydedilecekMesaj.mesaj,
+      'son_gorulme': false,
+      'olusturulma_tarihi': FieldValue.serverTimestamp(),
+    });
+
     return true;
+  }
+
+  @override
+  Future<List<KonusmaModel>> getAllConversation(String kullaniciID) async {
+    List<KonusmaModel> tumKonusmalar = [];
+    QuerySnapshot querySnapshot = await _firebaseFirestore
+        .collection("konusmalar")
+        .where("konusma_sahibi", isEqualTo: kullaniciID)
+        .orderBy('olusturulma_tarihi', descending: true)
+        .get();
+
+    for (DocumentSnapshot tekKonusma in querySnapshot.docs) {
+      tumKonusmalar.add(KonusmaModel.fromMap(tekKonusma.data()));
+    }
+    return tumKonusmalar;
   }
 }

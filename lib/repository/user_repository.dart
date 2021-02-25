@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:messaging_app/locator.dart';
+import 'package:messaging_app/model/konusma_model.dart';
 import 'package:messaging_app/model/mesaj.dart';
 import 'package:messaging_app/model/user_model.dart';
 import 'package:messaging_app/services/auth_base.dart';
@@ -17,6 +18,7 @@ class UserRepository implements AuthBase {
   FireStoreDbService _fireStoreDbService = locator<FireStoreDbService>();
   Firebase_Storage _firebase_storage = locator<Firebase_Storage>();
   AppMode appMode = AppMode.RELEASE;
+  List<Kullanici> tumKullanicilar = [];
 
   @override
   Future<Kullanici> currentUser() async {
@@ -91,7 +93,7 @@ class UserRepository implements AuthBase {
   }
 
   Future<List<Kullanici>> getAllUser() async {
-    List tumKullanicilar = await _fireStoreDbService.getAllUser();
+    tumKullanicilar = await _fireStoreDbService.getAllUser();
     return tumKullanicilar;
   }
 
@@ -109,6 +111,39 @@ class UserRepository implements AuthBase {
     } else {
       var sonuc = await _fireStoreDbService.saveMessage(kaydedilecekMesaj);
       return sonuc;
+    }
+  }
+
+  Future<List<KonusmaModel>> getAllConversation(String kullaniciID) async {
+    if (appMode == AppMode.DEBUG) {
+      return [];
+    } else {
+      var konusmaListesi = await _fireStoreDbService.getAllConversation(kullaniciID);
+      //List<KonusmaModel> konusmalarim;
+      for (var oankiKonusma in konusmaListesi) {
+        var userListesindekiKullanici = kullaniciBul(oankiKonusma.kimle_konusuyor);
+
+        if (userListesindekiKullanici != null) {
+          print('LOKALDE VARDI GETİRİLDİ');
+          oankiKonusma.userName = userListesindekiKullanici.userName; //Yarıtılan sohbetin eksik olan userName özelliğini tamamladık
+          oankiKonusma.profilURL = userListesindekiKullanici.profilURL;
+        } else {
+          print('LOKALDE YOKTU VERİTABANINDAN ÇEKİLDİ');
+          var _veritabanindanOkunanUser = await _fireStoreDbService.readUser(oankiKonusma.kimle_konusuyor);
+          oankiKonusma.userName = _veritabanindanOkunanUser.userName;
+          oankiKonusma.profilURL = _veritabanindanOkunanUser.profilURL;
+        }
+      }
+      return konusmaListesi;
+    }
+  }
+
+  Kullanici kullaniciBul(String kullaniciID) {
+    for (int i = 0; i < tumKullanicilar.length; i++) {
+      if (tumKullanicilar[i].kullaniciID == kullaniciID) {
+        return tumKullanicilar[i];
+      } else
+        return null;
     }
   }
 }

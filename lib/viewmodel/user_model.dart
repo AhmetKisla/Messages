@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:messaging_app/locator.dart';
+import 'package:messaging_app/model/konusma_model.dart';
 import 'package:messaging_app/model/mesaj.dart';
 import 'package:messaging_app/model/user_model.dart';
 import 'package:messaging_app/repository/user_repository.dart';
@@ -141,8 +142,12 @@ class UserModel with ChangeNotifier implements AuthBase {
     return _userRepository.getMessages(currentUserID, sohbetEdilenUserID);
   }
 
-  Future<bool> saveMesage(Mesaj kaydedilecekMesaj) {
-    var sonuc = _userRepository.saveMessages(kaydedilecekMesaj);
+  Future<bool> saveMesage(Mesaj kaydedilecekMesaj) async {
+    var sonuc = await _userRepository.saveMessages(kaydedilecekMesaj);
     return sonuc;
+  }
+
+  Future<List<KonusmaModel>> getAllConversation(String kullaniciID) async {
+    return await _userRepository.getAllConversation(kullaniciID);
   }
 }
