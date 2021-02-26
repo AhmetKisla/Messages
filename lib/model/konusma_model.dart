@@ -9,6 +9,7 @@ class KonusmaModel {
   final Timestamp gorulme_tarihi;
   String userName;
   String profilURL;
+  String zamanFarki;
 
   KonusmaModel({this.kimle_konusuyor, this.konusma_sahibi, this.olusturulma_tarihi, this.son_gorulme, this.son_yollanan_mesaj, this.gorulme_tarihi});
   Map<String, dynamic> toMap() {

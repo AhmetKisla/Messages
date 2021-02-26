@@ -1,6 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:messaging_app/model/konusma_model.dart';
+import 'package:messaging_app/model/user_model.dart';
+import 'package:messaging_app/sohbet/konusma.dart';
 import 'package:messaging_app/viewmodel/user_model.dart';
 import 'package:provider/provider.dart';
 
@@ -22,18 +23,48 @@ class _Konusmalarim_PageState extends State<Konusmalarim_Page> {
         future: _usermodel.getAllConversation(_usermodel.kullanici.kullaniciID),
         builder: (context, konusmaListesi) {
           if (konusmaListesi.hasData) {
-            return ListView.builder(
-              itemCount: konusmaListesi.data.length,
-              itemBuilder: (context, index) {
-                KonusmaModel oankiKonusma = konusmaListesi.data[index];
-                return ListTile(
-                  title: Text(oankiKonusma.son_yollanan_mesaj),
-                  subtitle: Text(oankiKonusma.userName),
-                  leading: CircleAvatar(
-                    child: Image.network(oankiKonusma.profilURL),
-                  ),
-                );
-              },
+            return RefreshIndicator(
+              onRefresh: _konusmalarimListesiniYenile,
+              child: ListView.builder(
+                itemCount: konusmaListesi.data.length,
+                itemBuilder: (context, index) {
+                  KonusmaModel oankiKonusma = konusmaListesi.data[index];
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.of(context, rootNavigator: true).push(
+                        MaterialPageRoute(
+                          builder: (context) => Konusma(
+                            currentUser: _usermodel.kullanici,
+                            sohbetEdienUser:
+                                Kullanici.kullaniciIDandProfilURL(kullaniciID: oankiKonusma.kimle_konusuyor, profilURL: oankiKonusma.profilURL),
+                          ),
+                        ),
+                      );
+                    },
+                    child: ListTile(
+                      title: Text(oankiKonusma.son_yollanan_mesaj),
+                      subtitle: Row(
+                        children: [
+                          Text(oankiKonusma.userName),
+                          Flexible(
+                            child: Container(
+                              width: MediaQuery.of(context).size.width,
+                              child: Text(
+                                oankiKonusma.zamanFarki,
+                                textAlign: TextAlign.end,
+                                style: TextStyle(),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      leading: CircleAvatar(
+                        child: Image.network(oankiKonusma.profilURL),
+                      ),
+                    ),
+                  );
+                },
+              ),
             );
           } else {
             return Center(
@@ -45,14 +76,7 @@ class _Konusmalarim_PageState extends State<Konusmalarim_Page> {
     );
   }
 
-  /* void _konusmalarimiGetir() async {
-    QuerySnapshot konusmalarim = await FirebaseFirestore.instance
-        .collection("konusmalar")
-        .where("konusma_sahibi", isEqualTo: _usermodel.kullanici.kullaniciID)
-        .orderBy('olusturulma_tarihi', descending: true)
-        .get();
-    for (var konusma in konusmalarim.docs) {
-      debugPrint("konusma:" + konusma.data().toString());
-    }
-  }*/
+  Future<void> _konusmalarimListesiniYenile() async {
+    setState(() {});
+  }
 }

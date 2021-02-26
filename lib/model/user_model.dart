@@ -13,6 +13,7 @@ class Kullanici {
   int seviye;
 
   Kullanici({@required this.kullaniciID, @required this.email});
+  Kullanici.kullaniciIDandProfilURL({@required this.kullaniciID, @required this.profilURL});
 
   Map<String, dynamic> toMap() {
     return {

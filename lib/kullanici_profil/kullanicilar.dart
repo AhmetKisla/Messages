@@ -5,7 +5,12 @@ import 'package:messaging_app/sohbet/konusma.dart';
 import 'package:messaging_app/viewmodel/user_model.dart';
 import 'package:provider/provider.dart';
 
-class KullanicilarPage extends StatelessWidget {
+class KullanicilarPage extends StatefulWidget {
+  @override
+  _KullanicilarPageState createState() => _KullanicilarPageState();
+}
+
+class _KullanicilarPageState extends State<KullanicilarPage> {
   @override
   Widget build(BuildContext context) {
     UserModel _userModel = Provider.of<UserModel>(context);
@@ -32,33 +37,36 @@ class KullanicilarPage extends StatelessWidget {
           if (sonuc.hasData) {
             List tumKullanicilar = sonuc.data;
             if (tumKullanicilar.length > 0) {
-              return ListView.builder(
-                itemCount: tumKullanicilar.length,
-                itemBuilder: (context, index) {
-                  if (sonuc.data[index].kullaniciID != _userModel.kullanici.kullaniciID) {
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.of(context, rootNavigator: true).push(
-                          MaterialPageRoute(
-                            builder: (context) => Konusma(
-                              currentUser: _userModel.kullanici,
-                              sohbetEdienUser: sonuc.data[index],
+              return RefreshIndicator(
+                onRefresh: _kullanicilarListesiniYenile,
+                child: ListView.builder(
+                  itemCount: tumKullanicilar.length,
+                  itemBuilder: (context, index) {
+                    if (sonuc.data[index].kullaniciID != _userModel.kullanici.kullaniciID) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.of(context, rootNavigator: true).push(
+                            MaterialPageRoute(
+                              builder: (context) => Konusma(
+                                currentUser: _userModel.kullanici,
+                                sohbetEdienUser: sonuc.data[index],
+                              ),
                             ),
+                          );
+                        },
+                        child: ListTile(
+                          title: Text(sonuc.data[index].userName),
+                          leading: CircleAvatar(
+                            backgroundImage: NetworkImage(sonuc.data[index].profilURL),
+                            backgroundColor: Colors.white,
                           ),
-                        );
-                      },
-                      child: ListTile(
-                        title: Text(sonuc.data[index].userName),
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(sonuc.data[index].profilURL),
-                          backgroundColor: Colors.white,
+                          subtitle: Text(sonuc.data[index].email),
                         ),
-                        subtitle: Text(sonuc.data[index].email),
-                      ),
-                    );
-                  } else
-                    return Container();
-                },
+                      );
+                    } else
+                      return Container();
+                  },
+                ),
               );
             }
           } else
@@ -68,5 +76,9 @@ class KullanicilarPage extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<void> _kullanicilarListesiniYenile() async {
+    setState(() {});
   }
 }

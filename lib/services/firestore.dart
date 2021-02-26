@@ -114,4 +114,14 @@ class FireStoreDbService implements DbBase {
     }
     return tumKonusmalar;
   }
+
+  @override
+  Future<DateTime> saatiGoster(kullaniciID) async {
+    await _firebaseFirestore.collection('server').doc(kullaniciID).set({
+      'saat': FieldValue.serverTimestamp(),
+    });
+    var okunanMap = await _firebaseFirestore.collection('server').doc(kullaniciID).get();
+    Timestamp okunanTarih = okunanMap.data()['saat'];
+    return okunanTarih.toDate();
+  }
 }

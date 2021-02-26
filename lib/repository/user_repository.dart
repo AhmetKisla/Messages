@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:timeago/timeago.dart' as timeago;
 import 'package:messaging_app/locator.dart';
 import 'package:messaging_app/model/konusma_model.dart';
 import 'package:messaging_app/model/mesaj.dart';
@@ -119,6 +119,8 @@ class UserRepository implements AuthBase {
       return [];
     } else {
       var konusmaListesi = await _fireStoreDbService.getAllConversation(kullaniciID);
+      var _zaman = await _fireStoreDbService.saatiGoster(kullaniciID);
+
       //List<KonusmaModel> konusmalarim;
       for (var oankiKonusma in konusmaListesi) {
         var userListesindekiKullanici = kullaniciBul(oankiKonusma.kimle_konusuyor);
@@ -127,15 +129,24 @@ class UserRepository implements AuthBase {
           print('LOKALDE VARDI GETİRİLDİ');
           oankiKonusma.userName = userListesindekiKullanici.userName; //Yarıtılan sohbetin eksik olan userName özelliğini tamamladık
           oankiKonusma.profilURL = userListesindekiKullanici.profilURL;
+          zamanFarkiniGoster(_zaman, oankiKonusma);
         } else {
           print('LOKALDE YOKTU VERİTABANINDAN ÇEKİLDİ');
           var _veritabanindanOkunanUser = await _fireStoreDbService.readUser(oankiKonusma.kimle_konusuyor);
           oankiKonusma.userName = _veritabanindanOkunanUser.userName;
           oankiKonusma.profilURL = _veritabanindanOkunanUser.profilURL;
+          zamanFarkiniGoster(_zaman, oankiKonusma);
         }
       }
+
       return konusmaListesi;
     }
+  }
+
+  void zamanFarkiniGoster(DateTime _zaman, KonusmaModel oankiKonusma) {
+    timeago.setLocaleMessages('tr', timeago.TrMessages());
+    Duration duration = _zaman.difference(oankiKonusma.olusturulma_tarihi.toDate());
+    oankiKonusma.zamanFarki = timeago.format(_zaman.subtract(duration), locale: 'tr');
   }
 
   Kullanici kullaniciBul(String kullaniciID) {
