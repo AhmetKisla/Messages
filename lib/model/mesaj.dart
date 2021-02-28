@@ -6,11 +6,12 @@ class Mesaj {
   final bool bendenMi;
   final String mesaj;
   final Timestamp date;
+  final String photoURL;
 
-  Mesaj({this.kimden, this.kime, this.bendenMi, this.mesaj, this.date});
+  Mesaj({this.photoURL, this.kimden, this.kime, this.bendenMi, this.mesaj, this.date});
 
   Map<String, dynamic> toMap() {
-    return {'kimden': kimden, 'kime': kime, 'bendenMi': bendenMi, 'mesaj': mesaj, 'date': date ?? FieldValue.serverTimestamp()};
+    return {'kimden': kimden, 'kime': kime, 'bendenMi': bendenMi, 'mesaj': mesaj, 'date': date ?? FieldValue.serverTimestamp(), 'photoURL': photoURL};
   }
 
   Mesaj.fromMap(Map<String, dynamic> map)
@@ -18,7 +19,8 @@ class Mesaj {
         kime = map['kime'],
         bendenMi = map['bendenMi'],
         mesaj = map['mesaj'],
-        date = map['date'] as Timestamp;
+        date = map['date'] as Timestamp,
+        photoURL = map['photoURL'];
 
   String toString() {
     return 'mesaj{kimden:$kimden, kime:$kime ,bendenMi:$bendenMi, mesaj:$mesaj, date:$date}';

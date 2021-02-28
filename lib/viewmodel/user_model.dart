@@ -142,6 +142,10 @@ class UserModel with ChangeNotifier implements AuthBase {
     return _userRepository.getMessages(currentUserID, sohbetEdilenUserID);
   }
 
+  Future<String> saveImageMessage(String kullaniciID, String sohbetEdilenID, File file, String fileType) {
+    return _userRepository.saveImageMessage(kullaniciID, sohbetEdilenID, file, fileType);
+  }
+
   Future<bool> saveMesage(Mesaj kaydedilecekMesaj) async {
     var sonuc = await _userRepository.saveMessages(kaydedilecekMesaj);
     return sonuc;

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:messaging_app/services/storageBase.dart';
 
@@ -15,5 +16,18 @@ class Firebase_Storage implements StorageBase {
     } else
       print(url);
     return url;
+  }
+
+  @override
+  Future<String> saveImageMessage(String kullaniciID, String sohbetEdilenID, File file, String fileType) async {
+    _storageReference = _firebaseStorage.ref().child(kullaniciID + sayi() + sohbetEdilenID).child(fileType);
+    UploadTask uploadTask = _storageReference.putFile(file);
+    var url = await (await uploadTask).ref.getDownloadURL();
+    return url;
+  }
+
+  String sayi() {
+    var sgn = new Random();
+    return sgn.nextInt(1000).toString();
   }
 }

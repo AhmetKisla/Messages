@@ -76,6 +76,7 @@ class FireStoreDbService implements DbBase {
     var _myDocumentID = kaydedilecekMesaj.kimden + '--' + kaydedilecekMesaj.kime;
     var _receiverDocumentID = kaydedilecekMesaj.kime + '--' + kaydedilecekMesaj.kimden;
     var _kaydedilecekMesajMapYapisi = kaydedilecekMesaj.toMap();
+
     await _firebaseFirestore.collection('konusmalar').doc(_myDocumentID).collection('mesajlar').doc(_mesajID).set(_kaydedilecekMesajMapYapisi);
 
     await _firebaseFirestore.collection('konusmalar').doc(_myDocumentID).set({

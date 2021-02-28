@@ -105,6 +105,15 @@ class UserRepository implements AuthBase {
     }
   }
 
+  Future<String> saveImageMessage(String kullaniciID, String sohbetEdilenID, File file, String fileType) async {
+    if (appMode == AppMode.DEBUG) {
+      return '';
+    } else {
+      String messagePhotoURL = await _firebase_storage.saveImageMessage(kullaniciID, sohbetEdilenID, file, fileType);
+      return messagePhotoURL;
+    }
+  }
+
   Future<bool> saveMessages(Mesaj kaydedilecekMesaj) async {
     if (appMode == AppMode.DEBUG) {
       return true;
